@@ -140,32 +140,32 @@ def search_yahoo_filtered(query: str, topic_keywords: List[str], max_results: in
 
 
 def parallel_search_web(queries: List[str], max_results_per_query: int = 4) -> List[Dict[str, str]]:
-    """Executes multi-engine search with strict subject-matter validation."""
+    """Executes multi-engine search concurrently with strict validation and safe timeouts."""
+    import concurrent.futures
     all_results = []
     seen_titles = set()
 
     primary_topic = queries[0] if queries else ""
     keywords = extract_keywords(primary_topic)
 
-    # Step 1: Run Google News
-    for q in queries[:2]:
-        for item in search_google_news(q, keywords, 3):
-            t = item.get('title', '').strip()
-            if t and t not in seen_titles:
-                seen_titles.add(t)
-                all_results.append(item)
-
-    # Step 2: Add Filtered Web & Wikipedia Results
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        futures = [executor.submit(search_yahoo_filtered, q, keywords, 2) for q in queries[:2]]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = []
+        for q in queries[:2]:
+            futures.append(executor.submit(search_google_news, q, keywords, 3))
         futures.append(executor.submit(search_wikipedia, primary_topic, keywords, 2))
-        for f in as_completed(futures, timeout=4.0):
+        if len(queries) > 1:
+            futures.append(executor.submit(search_wikipedia, queries[1], keywords, 2))
+
+        done, _ = concurrent.futures.wait(futures, timeout=3.5)
+        for f in done:
             try:
-                for item in f.result():
-                    t = item.get('title', '').strip()
-                    if t and t not in seen_titles:
-                        seen_titles.add(t)
-                        all_results.append(item)
+                items = f.result()
+                if items:
+                    for item in items:
+                        t = item.get('title', '').strip()
+                        if t and t not in seen_titles:
+                            seen_titles.add(t)
+                            all_results.append(item)
             except Exception:
                 pass
 

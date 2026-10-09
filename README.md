@@ -1,7 +1,10 @@
 # 🤖 DeepResearch AI — Autonomous Multi-Agent Research & Fact-Verification System
 
 > **Portfolio Project #02** | An autonomous 4-agent collaborative intelligence pipeline engineered with CrewAI, adversarial reflection, dynamic rubric scoring, and anti-hallucination verification powered by Google Gemini 3.8 Flash.
+> 🌐 **Live Application URL**: [https://deepresearch-ai.streamlit.app](https://deepresearch-ai.streamlit.app)
 
+
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Streamlit_Cloud-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://deepresearch-ai.streamlit.app)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![CrewAI](https://img.shields.io/badge/Orchestration-CrewAI_Agents-FF6B6B?style=for-the-badge&logo=crewai&logoColor=white)](https://crewai.com)

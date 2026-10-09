@@ -62,7 +62,7 @@ CRITICAL RULES:
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             temperature=0.15,
-            max_tokens=8192
+            max_tokens=3000
         )
         state.draft = draft
 
