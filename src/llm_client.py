@@ -1,6 +1,6 @@
 # ============================================================
 # FILE: src/llm_client.py
-# PURPOSE: High-Performance Google Gemini 3.8 Flash LLM Client
+# PURPOSE: High-Performance Google Gemini Flash Multi-Agent LLM Client
 # ============================================================
 
 from typing import Dict, Any, List, Optional
@@ -19,15 +19,25 @@ except ImportError:
 
 class LLMClient:
     """
-    Client for Google Gemini 3.8 Flash cloud inference with resilient
+    Client for Google Gemini Flash cloud inference with resilient
     multi-model fallback across the Gemini Flash series.
+    Prioritizes ultra-fast models to ensure multi-agent synthesis finishes in seconds.
     """
 
-    DEFAULT_MODEL = "gemini-3.8-flash"
+    DEFAULT_MODEL = "gemini-3.5-flash-lite"
 
     def __init__(self, api_key: Optional[str] = None, engine_mode: str = "gemini_flash"):
         self.api_key = api_key or self._get_secret("GEMINI_API_KEY")
         self.engine_mode = "gemini_flash"
+        self.models_to_try = [
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash",
+            "gemini-3.6-flash",
+            "gemini-3.8-flash",
+            "gemini-3.7-flash",
+            "gemini-flash-latest",
+            "gemini-3.1-flash-lite"
+        ]
 
     def _get_secret(self, key_name: str) -> str:
         """Fetches API key from env or Streamlit secrets."""
@@ -46,27 +56,23 @@ class LLMClient:
         system_prompt: str,
         user_prompt: str,
         temperature: float = 0.2,
-        max_tokens: int = 8192
+        max_tokens: int = 4096
     ) -> str:
         """
-        Executes generation using Google Gemini 3.8 Flash with full content parts
-        joining, generous 8192 maxOutputTokens ceiling, and resilient model fallback.
+        Executes generation using Google Gemini Flash with fast failover
+        and robust multi-model fallback.
         """
         gemini_key = self.api_key or self._get_secret("GEMINI_API_KEY")
         if not gemini_key:
-            raise RuntimeError("GEMINI_API_KEY is not configured! Please ensure your Gemini API key is set in .env")
+            raise RuntimeError("GEMINI_API_KEY is not configured! Please ensure your Gemini API key is set in .env or secrets.")
 
-        models_to_try = [
-            "gemini-3.8-flash",
-            "gemini-3.7-flash",
-            "gemini-3.6-flash",
-            "gemini-3.5-flash",
-            "gemini-flash-latest",
-            "gemini-3.5-flash-lite",
-            "gemini-3.1-flash-lite"
-        ]
-
-        combined_prompt = f"SYSTEM INSTRUCTIONS:\n{system_prompt}\n\nUSER REQUEST:\n{user_prompt}\n\nIMPORTANT: Complete your entire response fully. Never cut off midway."
+        combined_prompt = (
+            "SYSTEM INSTRUCTIONS:\n"
+            + system_prompt
+            + "\n\nUSER REQUEST:\n"
+            + user_prompt
+            + "\n\nIMPORTANT: Complete your entire response fully. Never cut off midway."
+        )
 
         payload = {
             "contents": [{"parts": [{"text": combined_prompt}]}],
@@ -77,10 +83,10 @@ class LLMClient:
         }
 
         last_error = ""
-        for model in models_to_try:
+        for model in self.models_to_try:
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={gemini_key}"
-                res = requests.post(url, json=payload, timeout=60)
+                res = requests.post(url, json=payload, timeout=18)
 
                 if res.status_code == 200:
                     data = res.json()
@@ -91,8 +97,8 @@ class LLMClient:
                         full_text = "".join(text_chunks).strip()
                         if full_text:
                             return full_text
-                elif res.status_code == 429:
-                    last_error = f"Rate limit on {model}, rotating to fallback..."
+                elif res.status_code in [429, 503]:
+                    last_error = f"Model {model} busy ({res.status_code}), cascading to fallback..."
                     continue
                 else:
                     last_error = f"API error on {model} (Status {res.status_code}): {res.text[:80]}"
@@ -106,7 +112,7 @@ class LLMClient:
             import google.generativeai as genai
             genai.configure(api_key=gemini_key)
             sdk_model = genai.GenerativeModel(
-                "gemini-3.8-flash",
+                "gemini-3.5-flash-lite",
                 generation_config={"max_output_tokens": max_tokens, "temperature": temperature}
             )
             response = sdk_model.generate_content(combined_prompt)
@@ -119,7 +125,10 @@ class LLMClient:
 
     def generate_json(self, system_prompt: str, user_prompt: str, max_tokens: int = 500) -> Dict[str, Any]:
         """Generates validated JSON output with robust regex parsing."""
-        json_system = f"{system_prompt}\nCRITICAL: Respond ONLY with a valid JSON object. No Markdown code fences or extra text."
+        json_system = (
+            system_prompt
+            + "\nCRITICAL: Respond ONLY with a valid JSON object. No Markdown code fences or extra text."
+        )
         raw = self.generate(json_system, user_prompt, temperature=0.1, max_tokens=max_tokens)
 
         clean = re.sub(r"^```json\s*", "", raw, flags=re.MULTILINE)
