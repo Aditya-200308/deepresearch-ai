@@ -657,7 +657,7 @@ with tab_lab:
                 </div>
                 """, unsafe_allow_html=True)
 
-        with st.spinner("🤖 Multi-agent crew researching and synthesizing..."):
+        with st.spinner("⚡ Autonomous 4-Agent team actively investigating & writing..."):
             final_state = orchestrator.run_pipeline(
                 topic=topic,
                 max_revisions=max_revisions,

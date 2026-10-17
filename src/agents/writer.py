@@ -63,7 +63,7 @@ CRITICAL RULES:
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 temperature=0.15,
-                max_tokens=3000
+                max_tokens=1800
             )
         except Exception as e:
             # Resilient synthesis fallback using verified ground-truth research dossier
