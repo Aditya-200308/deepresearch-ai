@@ -657,16 +657,15 @@ with tab_lab:
                 </div>
                 """, unsafe_allow_html=True)
 
-        with st.spinner("⚡ Autonomous 4-Agent team actively investigating & writing..."):
-            final_state = orchestrator.run_pipeline(
-                topic=topic,
-                max_revisions=max_revisions,
-                on_step_callback=update_progress
-            )
-            st.session_state["pipeline_state"] = final_state
+        final_state = orchestrator.run_pipeline(
+            topic=topic,
+            max_revisions=max_revisions,
+            on_step_callback=update_progress
+        )
+        st.session_state["pipeline_state"] = final_state
 
-            if st.session_state.get("enable_sound"):
-                play_chime()
+        if st.session_state.get("enable_sound"):
+            play_chime()
 
         st.rerun()
 

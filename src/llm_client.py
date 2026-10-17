@@ -89,13 +89,13 @@ class LLMClient:
         for model in self.models_to_try:
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={gemini_key}"
-                # Ultra-responsive failover: don't sit waiting for lagging/rate-limited models
+                # Instant failover: don't stall when primary/backup hit rate limits (429) or cloud queues
                 if model == PRIMARY_MODEL:
-                    timeout_sec = 5
+                    timeout_sec = 1.5
                 elif model == BACKUP_MODEL:
-                    timeout_sec = 6
+                    timeout_sec = 2.0
                 else:
-                    timeout_sec = 18
+                    timeout_sec = 15
                 res = requests.post(url, json=payload, timeout=timeout_sec)
 
                 if res.status_code == 200:
