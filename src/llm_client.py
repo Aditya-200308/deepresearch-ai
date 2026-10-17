@@ -36,8 +36,9 @@ class LLMClient:
         self.primary_model = PRIMARY_MODEL
         self.backup_model = BACKUP_MODEL
         self.models_to_try = [
-            PRIMARY_MODEL,       # "gemini-4-argon" (Active Primary)
-            BACKUP_MODEL,        # "gemini-3.8-flash" (Active Backup)
+            PRIMARY_MODEL,            # "gemini-4-argon" (Active Primary)
+            BACKUP_MODEL,             # "gemini-3.8-flash" (Active Backup)
+            "gemini-3-flash-preview", # Resilient ultra-low latency fallback
             "gemini-flash-latest"
         ]
 
@@ -88,7 +89,8 @@ class LLMClient:
         for model in self.models_to_try:
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={gemini_key}"
-                res = requests.post(url, json=payload, timeout=18)
+                timeout_sec = 15 if model == PRIMARY_MODEL else 35
+                res = requests.post(url, json=payload, timeout=timeout_sec)
 
                 if res.status_code == 200:
                     data = res.json()
@@ -105,6 +107,9 @@ class LLMClient:
                 else:
                     last_error = f"API error on {model} (Status {res.status_code}): {res.text[:80]}"
                     continue
+            except requests.exceptions.Timeout:
+                last_error = f"Model {model} read timed out ({timeout_sec}s), cascading to fallback..."
+                continue
             except Exception as e:
                 last_error = str(e)
                 continue
