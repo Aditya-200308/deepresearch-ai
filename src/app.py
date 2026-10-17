@@ -68,7 +68,7 @@ with st.sidebar:
         <div style="display: flex; align-items: center; gap: 0.65rem;">
             <span style="font-size: 1.35rem;">⚡</span>
             <div>
-                <div style="color: #ffffff; font-weight: 800; font-size: 0.95rem; letter-spacing: -0.01em;">Google Gemini 3.8 Flash</div>
+                <div style="color: #ffffff; font-weight: 800; font-size: 0.95rem; letter-spacing: -0.01em;">Google Gemini 4 Argon (Primary) | 3.8 Flash (Backup)</div>
                 <div style="color: #fbcfe8; font-size: 0.78rem; font-weight: 600;">Active Cloud Turbo Engine</div>
             </div>
         </div>
@@ -454,7 +454,7 @@ def play_chime():
 st.markdown("""
 <div class="top-utility-bar">
     <div class="utility-badge"><span style="font-size: 1.15rem;">🦜</span> <strong>Architecture:</strong> <span style="color: #fbcfe8;">CrewAI Autonomous Agents</span></div>
-    <div class="utility-badge"><span style="font-size: 1.15rem;">⚡</span> <strong>LLM Engine:</strong> <span style="color: #fda4af;">Google Gemini 3.8 Flash</span></div>
+    <div class="utility-badge"><span style="font-size: 1.15rem;">⚡</span> <strong>LLM Engine:</strong> <span style="color: #fda4af;">Google Gemini 4 Argon (Primary) | 3.8 Flash (Backup)</span></div>
     <div class="utility-badge"><span style="font-size: 1.15rem;">🌐</span> <strong>Grounding:</strong> <span style="color: #fb7185;">Live Web & Wikipedia Index</span></div>
     <div class="utility-badge"><span style="font-size: 1.15rem;">🛡️</span> <strong>Audit:</strong> <span style="color: #ffe4e6;">Anti-Hallucination Gate</span></div>
 </div>
@@ -463,10 +463,10 @@ st.markdown("""
     <div style="display: flex; align-items: center; gap: 0.9rem; margin-bottom: 0.7rem; flex-wrap: wrap;">
         <span style="font-size: 3.2rem; line-height: 1; filter: drop-shadow(0 0 20px rgba(225, 29, 72, 0.75));">🤖</span>
         <span class="hero-title">DeepResearch AI</span>
-        <span class="hero-pill">🦜 CREWAI • ⚡ GEMINI 3.8 FLASH</span>
+        <span class="hero-pill">🦜 CREWAI • ⚡ GEMINI 4 ARGON (PRIMARY) | 3.8 FLASH (BACKUP)</span>
     </div>
     <div style="color: #cbd5e1; font-size: 1.15rem; line-height: 1.75;">
-        <strong>Autonomous Multi-Agent Intelligence & Fact-Verification Platform</strong> — Orchestrating 4 specialized AI agents (<strong>Lead Researcher ➔ Senior Writer ➔ Editorial Critic ➔ Fact-Checking Auditor</strong>) through an adversarial reflection & self-correction loop powered by <strong>Google Gemini 3.8 Flash</strong>.
+        <strong>Autonomous Multi-Agent Intelligence & Fact-Verification Platform</strong> — Orchestrating 4 specialized AI agents (<strong>Lead Researcher ➔ Senior Writer ➔ Editorial Critic ➔ Fact-Checking Auditor</strong>) through an adversarial reflection & self-correction loop powered by <strong>Google Gemini 4 Argon (Primary) | 3.8 Flash (Backup)</strong>.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -793,5 +793,5 @@ with tab_architecture:
     1. **Separation of Concerns**: Each agent operates with a dedicated persona and task, preventing single-prompt cognitive overload.
     2. **Adversarial Reflection**: The Editorial Critic grades drafts against an empirical 4-dimension rubric (Depth, Structure, Evidence, Strategy), sending actionable feedback back to the Writer if quality is below 85%.
     3. **Hallucination Prevention**: The Fact-Checking Auditor rigorously cross-examines all numerical assertions, dates, and names against the original research dossier.
-    4. **Google Gemini 3.8 Flash Powered**: Powered by Google's latest Gemini 3.8 Flash engine for rapid, deeply grounded analytical synthesis.
+    4. **Google Gemini 4 Argon (Primary) | 3.8 Flash (Backup) Powered**: Powered by Google's latest Gemini 4 Argon (Primary) & 3.8 Flash (Backup) engine for rapid, deeply grounded analytical synthesis.
     """)

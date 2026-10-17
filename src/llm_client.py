@@ -17,26 +17,28 @@ except ImportError:
     pass
 
 
+PRIMARY_MODEL = "gemini-4-argon"
+BACKUP_MODEL = "gemini-3.8-flash"
+
 class LLMClient:
     """
-    Client for Google Gemini Flash cloud inference with resilient
-    multi-model fallback across the Gemini Flash series.
-    Prioritizes ultra-fast models to ensure multi-agent synthesis finishes in seconds.
+    Client for Google Gemini cloud inference featuring:
+    - Primary Model: Google Gemini 4 Argon
+    - Backup Model: Google Gemini 3.8 Flash
+    - Zero dead roundtrips (purged discontinued 3.5/3.6/3.7 endpoints).
     """
 
-    DEFAULT_MODEL = "gemini-3.5-flash-lite"
+    DEFAULT_MODEL = PRIMARY_MODEL
 
     def __init__(self, api_key: Optional[str] = None, engine_mode: str = "gemini_flash"):
         self.api_key = api_key or self._get_secret("GEMINI_API_KEY")
         self.engine_mode = "gemini_flash"
+        self.primary_model = PRIMARY_MODEL
+        self.backup_model = BACKUP_MODEL
         self.models_to_try = [
-            "gemini-3.5-flash-lite",
-            "gemini-3.5-flash",
-            "gemini-3.6-flash",
-            "gemini-3.8-flash",
-            "gemini-3.7-flash",
-            "gemini-flash-latest",
-            "gemini-3.1-flash-lite"
+            PRIMARY_MODEL,       # "gemini-4-argon" (Active Primary)
+            BACKUP_MODEL,        # "gemini-3.8-flash" (Active Backup)
+            "gemini-flash-latest"
         ]
 
     def _get_secret(self, key_name: str) -> str:
@@ -112,7 +114,7 @@ class LLMClient:
             import google.generativeai as genai
             genai.configure(api_key=gemini_key)
             sdk_model = genai.GenerativeModel(
-                "gemini-3.5-flash-lite",
+                "gemini-4-argon",
                 generation_config={"max_output_tokens": max_tokens, "temperature": temperature}
             )
             response = sdk_model.generate_content(combined_prompt)

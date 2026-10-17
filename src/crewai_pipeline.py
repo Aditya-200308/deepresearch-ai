@@ -106,7 +106,7 @@ class CrewAIPipeline:
     CrewAI Autonomous 4-Agent Research & Verification Pipeline
     """
 
-    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini/gemini-1.5-flash"):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini/gemini-4-argon"):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
         self.model_name = model_name
         

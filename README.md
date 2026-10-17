@@ -1,6 +1,6 @@
 # 🤖 DeepResearch AI — Autonomous Multi-Agent Research & Fact-Verification System
 
-> **Portfolio Project #02** | An autonomous 4-agent collaborative intelligence pipeline engineered with CrewAI, adversarial reflection, dynamic rubric scoring, and anti-hallucination verification powered by Google Gemini 3.8 Flash.
+> **Portfolio Project #02** | An autonomous 4-agent collaborative intelligence pipeline engineered with CrewAI, adversarial reflection, dynamic rubric scoring, and anti-hallucination verification powered by Google Gemini 4 Argon (Primary) & 3.8 Flash (Backup).
 >
 > 🌐 **Live Demo (Streamlit Cloud)**: [https://deepresearch-platform.streamlit.app/](https://deepresearch-platform.streamlit.app/)
 
@@ -8,7 +8,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![CrewAI](https://img.shields.io/badge/Orchestration-CrewAI_Agents-FF6B6B?style=for-the-badge&logo=crewai&logoColor=white)](https://crewai.com)
-[![Google Gemini](https://img.shields.io/badge/Google_Gemini-3.8_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-4_Argon_%7C_3.8_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
 
 ---
 
