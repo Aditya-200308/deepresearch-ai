@@ -3,6 +3,7 @@
 # PURPOSE: Agent 2 — Senior Writer (Exhaustive Intelligence Author)
 # ============================================================
 
+import re
 from src.state import PipelineState
 from src.llm_client import LLMClient
 
