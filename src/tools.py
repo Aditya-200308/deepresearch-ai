@@ -13,13 +13,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 import xml.etree.ElementTree as ET
 
-if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'User-Agent': 'DeepResearchBot/2.0 (Mozilla/5.0 Enterprise Research; https://github.com/Aditya-200308/deepresearch-ai)',
     'Accept-Language': 'en-US,en;q=0.9'
 }
 
@@ -46,10 +46,10 @@ def is_relevant(title: str, snippet: str, topic_keywords: List[str]) -> bool:
         return True
 
     # Immediate discard for spam, games, or mismatch triggers
-    spam_triggers = ["solitaire", "casino", "poker", "download free games", "card game",
-                     "horoscope", "crossword", "sudoku", "recipe"]
+    spam_triggers = ['solitaire', 'casino', 'poker', 'download free games', 'card game',
+                     'horoscope', 'crossword', 'sudoku', 'recipe']
     for spam in spam_triggers:
-        if spam in (t_lower + " " + s_lower) and not any(spam in kw for kw in topic_keywords):
+        if spam in (t_lower + ' ' + s_lower) and not any(spam in kw for kw in topic_keywords):
             return False
 
     # Primary rule: The article title must contain at least one primary topic keyword
@@ -83,18 +83,43 @@ def search_google_news(query: str, topic_keywords: List[str], max_results: int =
     return results
 
 
-def search_wikipedia(query: str, topic_keywords: List[str], max_results: int = 2) -> List[Dict[str, str]]:
-    """Fetches encyclopedic context from Wikipedia API using pure standard library requests."""
-    url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={requests.utils.quote(query)}&limit={max_results}&namespace=0&format=json"
+def search_wikipedia(query: str, topic_keywords: List[str] = None, max_results: int = 1) -> List[Dict[str, str]]:
+    """
+    Fetches rich encyclopedic definitions and background from Wikipedia
+    using Wikipedia Query Search and Extracts API (prop=extracts&exintro=true&explaintext=true).
+    """
+    clean_q = re.sub(r'^(who|what|where|why|how|tell me about|explain)\s+(is|was|are|were)?\s*', '', query, flags=re.I).strip(' ?.:')
+    if not clean_q:
+        clean_q = query.strip(' ?.:')
+
+    headers = {'User-Agent': 'DeepResearchBot/2.0 (Academic Research; https://github.com/Aditya-200308/deepresearch-ai)'}
     results = []
+    
+    # 1. Search Wikipedia for best matching article title
+    search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={requests.utils.quote(clean_q)}&srlimit=2&format=json"
     try:
-        r = requests.get(url, headers=HEADERS, timeout=4)
+        r = requests.get(search_url, headers=headers, timeout=5)
         if r.status_code == 200:
-            data = r.json()
-            titles, snippets, urls = data[1], data[2], data[3]
-            for t, s, u in zip(titles, snippets, urls):
-                if s and len(s) > 20 and is_relevant(t, s, topic_keywords):
-                    results.append({'title': f"Wikipedia: {t}", 'url': u, 'snippet': s})
+            items = r.json().get('query', {}).get('search', [])
+            if items:
+                best_title = items[0]['title']
+                # 2. Fetch full introductory encyclopedic extract
+                extract_url = f"https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=true&explaintext=true&titles={requests.utils.quote(best_title)}&format=json"
+                r2 = requests.get(extract_url, headers=headers, timeout=5)
+                if r2.status_code == 200:
+                    pages = r2.json().get('query', {}).get('pages', {})
+                    for pid, pdata in pages.items():
+                        extract = pdata.get('extract', '').strip()
+                        if extract and len(extract) > 40:
+                            clean_extract = re.sub(r'\s*\([^)]*?(?:IPA|IAST|Sanskrit|listen|pronounced)[^)]*?\)', '', extract)
+                            clean_extract = re.sub(r'\s{2,}', ' ', clean_extract).strip()
+                            slug = best_title.replace(' ', '_')
+                            results.append({
+                                'title': f"Wikipedia: {best_title}",
+                                'url': f"https://en.wikipedia.org/wiki/{slug}",
+                                'snippet': clean_extract[:1600]
+                            })
+                            break
     except Exception:
         pass
     return results
@@ -125,8 +150,7 @@ def search_yahoo_filtered(query: str, topic_keywords: List[str], max_results: in
                     if len(results) >= max_results:
                         break
             except ImportError:
-                # Built-in standard library regex fallback (Zero external package dependency)
-                items = re.findall(r'<h3[^>]*>(.*?)</h3>.*?<div[^>]*class="[^"]*compText[^"]*"[^>]*>(.*?)</div>', r.text, re.DOTALL)
+                items = re.findall(r'<h3[^>]*>(.*?)</h3>.*?<div[^>]*class="compText"[^>]*>(.*?)</div>', r.text, re.DOTALL)
                 for title_html, desc_html in items:
                     title_text = re.sub(r'<[^>]+>', ' ', title_html).strip()
                     desc_text = re.sub(r'<[^>]+>', ' ', desc_html).strip()
@@ -140,34 +164,46 @@ def search_yahoo_filtered(query: str, topic_keywords: List[str], max_results: in
 
 
 def parallel_search_web(queries: List[str], max_results_per_query: int = 4) -> List[Dict[str, str]]:
-    """Executes multi-engine search concurrently with strict validation and safe timeouts."""
-    import concurrent.futures
+    """Executes multi-engine search concurrently with guaranteed Wikipedia encyclopedic priority."""
     all_results = []
     seen_titles = set()
 
-    primary_topic = queries[0] if queries else ""
+    primary_topic = queries[0] if queries else ''
     keywords = extract_keywords(primary_topic)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        futures = []
-        for q in queries[:2]:
-            futures.append(executor.submit(search_google_news, q, keywords, 3))
-        futures.append(executor.submit(search_wikipedia, primary_topic, keywords, 2))
-        if len(queries) > 1:
-            futures.append(executor.submit(search_wikipedia, queries[1], keywords, 2))
+    wiki_results = []
+    news_results = []
 
-        done, _ = concurrent.futures.wait(futures, timeout=3.5)
-        for f in done:
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        wiki_future = executor.submit(search_wikipedia, primary_topic, keywords, 1)
+        news_futures = [executor.submit(search_google_news, q, keywords, 3) for q in queries[:2]]
+
+        try:
+            wiki_results = wiki_future.result(timeout=5.0)
+        except Exception:
+            wiki_results = []
+
+        for f in news_futures:
             try:
-                items = f.result()
+                items = f.result(timeout=5.0)
                 if items:
-                    for item in items:
-                        t = item.get('title', '').strip()
-                        if t and t not in seen_titles:
-                            seen_titles.add(t)
-                            all_results.append(item)
+                    news_results.extend(items)
             except Exception:
                 pass
+
+    # Wikipedia encyclopedic grounding is guaranteed top priority
+    for item in wiki_results:
+        t = item.get('title', '').strip()
+        if t and t not in seen_titles:
+            seen_titles.add(t)
+            all_results.append(item)
+
+    # Followed by verified primary news articles
+    for item in news_results:
+        t = item.get('title', '').strip()
+        if t and t not in seen_titles:
+            seen_titles.add(t)
+            all_results.append(item)
 
     return all_results
 

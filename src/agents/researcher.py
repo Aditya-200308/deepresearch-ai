@@ -1,6 +1,6 @@
 # ============================================================
 # FILE: src/agents/researcher.py
-# PURPOSE: Agent 1 — Lead Researcher (Universal Granular Intelligence Scourer)
+# PURPOSE: Agent 1 - Lead Researcher (Universal Granular Intelligence Scourer)
 # ============================================================
 
 from typing import List, Dict, Any

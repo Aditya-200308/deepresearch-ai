@@ -1,6 +1,6 @@
 # ============================================================
 # FILE: src/agents/fact_checker.py
-# PURPOSE: Agent 4 — Ultra-Fast Deterministic Fact-Checking Auditor (<0.1s)
+# PURPOSE: Agent 4 - Ultra-Fast Deterministic Fact-Checking Auditor (<0.1s)
 # ============================================================
 
 import re

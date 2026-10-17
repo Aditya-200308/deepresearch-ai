@@ -1,6 +1,6 @@
 # ============================================================
 # FILE: src/agents/critic.py
-# PURPOSE: Agent 3 & 4 — Quality, Citations & Compliance Auditor
+# PURPOSE: Agent 3 - Quality, Citations & Compliance Auditor
 # ============================================================
 
 import re
@@ -11,7 +11,7 @@ from src.llm_client import LLMClient
 
 class CriticAgent:
     NAME = "Editorial Critic"
-    ICON = "🧐"
+    ICON = "⚖️"
     PASSING_SCORE = 85
 
     def __init__(self, llm_client: LLMClient):
@@ -53,4 +53,3 @@ class CriticAgent:
             f"Passed quality threshold ({total_score} >= {self.PASSING_SCORE}). Proceeding to final fact-check audit."
         )
         return state
-
