@@ -626,7 +626,8 @@ with tab_lab:
 
         max_revisions = st.session_state.get("max_revisions", 2)
         framework = st.session_state.get("framework_choice", "crewai")
-        orchestrator = MultiAgentOrchestrator(framework=framework)
+        user_key = st.session_state.get("custom_api_key") or None
+        orchestrator = MultiAgentOrchestrator(api_key=user_key, framework=framework)
 
         progress_bar = st.progress(0, text="Initializing Agent Team...")
         status_box = st.empty()
