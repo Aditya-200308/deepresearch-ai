@@ -89,13 +89,9 @@ class LLMClient:
         for model in self.models_to_try:
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={gemini_key}"
-                # Instant failover: fast check on primary/backup (2s), healthy model gets 28s to finish complete neural synthesis
-                if model == PRIMARY_MODEL:
-                    timeout_sec = 2.0
-                elif model == BACKUP_MODEL:
-                    timeout_sec = 2.5
-                else:
-                    timeout_sec = 28
+                # Allow adequate time (25s) for full neural synthesis of 1500+ token executive reports.
+                # 429/503 status codes return in <0.5s without waiting for timeout.
+                timeout_sec = 25.0
                 res = requests.post(url, json=payload, timeout=timeout_sec)
 
                 if res.status_code == 200:
