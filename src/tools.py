@@ -117,7 +117,7 @@ def search_wikipedia(query: str, topic_keywords: List[str] = None, max_results: 
                             results.append({
                                 'title': f"Wikipedia: {best_title}",
                                 'url': f"https://en.wikipedia.org/wiki/{slug}",
-                                'snippet': clean_extract[:1600]
+                                'snippet': clean_extract[:3800]
                             })
                             break
     except Exception:
